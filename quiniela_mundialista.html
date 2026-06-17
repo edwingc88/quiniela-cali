@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiniela Mundialista - 60 Combinaciones</title>
+    <!-- Tailwind CSS para un diseño responsivo y de alto impacto -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #032e20; /* Verde oscuro futbolero */
+            background-image: radial-gradient(circle at top, #054a33 0%, #021a12 100%);
+        }
+        /* Transiciones suaves para los cambios de estado de las tarjetas */
+        .card-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #021a12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen font-sans">
+
+    <!-- Header Principal Simplificado -->
+    <header class="py-6 px-4 border-b border-emerald-950 bg-opacity-60 bg-black backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="text-center sm:text-left">
+                <span class="bg-emerald-500 text-black text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full tracking-wider">
+                    Mundial 2026
+                </span>
+                <h1 class="text-2xl md:text-3xl font-black mt-1 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-emerald-400">
+                    QUINIELAS ASIGNADAS
+                </h1>
+                <p class="text-emerald-400 text-xs mt-0.5">
+                    Filtra y descarta las combinaciones perdedoras en tiempo real. Cada combinación cuenta con su código único.
+                </p>
+            </div>
+            
+            <!-- Acciones -->
+            <div>
+                <button onclick="exportarQuinielas()" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all duration-200 flex items-center gap-2 text-sm transform active:scale-95">
+                    <i class="fas fa-file-export"></i> Exportar Datos
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- Pestañas de Navegación por Participante -->
+        <div class="mb-8 flex flex-wrap justify-center gap-2 bg-emerald-950/60 p-2 rounded-2xl border border-emerald-900/60 max-w-3xl mx-auto">
+            <button onclick="filtrarPersona('TODOS')" id="btn-TODOS" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-amber-500 text-slate-950">
+                ⭐ Ver Todos (60)
+            </button>
+            <button onclick="filtrarPersona('Anibal')" id="btn-Anibal" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all text-emerald-300 hover:bg-emerald-900/40">
+                Anibal
+            </button>
+            <button onclick="filtrarPersona('Mendez')" id="btn-Mendez" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all text-emerald-300 hover:bg-emerald-900/40">
+                Mendez
+            </button>
+            <button onclick="filtrarPersona('Yusneidy')" id="btn-Yusneidy" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all text-emerald-300 hover:bg-emerald-900/40">
+                Yusneidy
+            </button>
+            <button onclick="filtrarPersona('Varon')" id="btn-Varon" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all text-emerald-300 hover:bg-emerald-900/40">
+                Varon
+            </button>
+            <button onclick="filtrarPersona('Maria')" id="btn-Maria" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all text-emerald-300 hover:bg-emerald-900/40">
+                Maria
+            </button>
+            <button onclick="filtrarPersona('Papa')" id="btn-Papa" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all text-emerald-300 hover:bg-emerald-900/40">
+                Papa
+            </button>
+        </div>
+
+        <!-- Secciones de Contenido de Tarjetas -->
+        <div id="contenedor-principal" class="space-y-12">
+            <!-- Se inyectarán dinámicamente las secciones de cada persona con sus 10 tarjetas -->
+        </div>
+
+    </main>
+
+    <!-- Modal para exportar datos -->
+    <div id="modal-exportar" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-emerald-950 border border-emerald-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-amber-400"><i class="fas fa-list-ol"></i> Distribución de Quinielas de los Participantes</h3>
+                <button onclick="cerrarModal()" class="text-emerald-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <textarea id="texto-exportado" readonly class="w-full h-80 bg-emerald-900/40 border border-emerald-800 rounded-xl p-4 font-mono text-xs text-emerald-200 focus:outline-none mb-4"></textarea>
+            <div class="flex justify-end gap-3">
+                <button onclick="copiarAlPortapapeles()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-2">
+                    <i class="fas fa-copy"></i> Copiar
+                </button>
+                <button onclick="cerrarModal()" class="bg-emerald-800 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-xs">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-8 mt-12 border-t border-emerald-950 text-center text-xs text-emerald-600 bg-emerald-950/10">
+        <p>© 2026 Sistema de Reparto Equitativo de Pronósticos.</p>
+    </footer>
+
+    <!-- LÓGICA DE PROGRAMACIÓN -->
+    <script>
+        // Listado estático de participantes (6 personas)
+        const personas = ["Anibal", "Mendez", "Yusneidy", "Varon", "Maria", "Papa"];
+
+        // Información de banderas y nombres extendidos de equipos
+        const banderasEquipos = {
+            "FRA": { nombre: "Francia", bandera: "https://flagcdn.com/w40/fr.png" },
+            "ARG": { nombre: "Argentina", bandera: "https://flagcdn.com/w40/ar.png" },
+            "ESP": { nombre: "España", bandera: "https://flagcdn.com/w40/es.png" },
+            "ENG": { nombre: "Inglaterra", bandera: "https://flagcdn.com/w40/gb-eng.png" },
+            "MAR": { nombre: "Marruecos", bandera: "https://flagcdn.com/w40/ma.png" },
+            "POR": { nombre: "Portugal", bandera: "https://flagcdn.com/w40/pt.png" },
+            "GER": { nombre: "Alemania", bandera: "https://flagcdn.com/w40/de.png" },
+            "USA": { nombre: "USA", bandera: "https://flagcdn.com/w40/us.png" },
+            "BRA": { nombre: "Brasil", bandera: "https://flagcdn.com/w40/br.png" }
+        };
+
+        // ARRAY DE OBJETOS ESTÁTICO DE 60 QUINIELAS DIRECTAS (No aleatorio)
+        // Se agregó un campo "codigo" único para identificar individualmente cada combinación
+        const todasLasQuinielas = [
+            // 10 de Anibal (0-9)
+            { codigo: "C-101", primer: "FRA", segundo: "BRA", tercer: "MAR", cuarto: "ARG" },
+            { codigo: "C-102", primer: "ARG", segundo: "FRA", tercer: "ESP", cuarto: "ENG" },
+            { codigo: "C-103", primer: "BRA", segundo: "GER", tercer: "POR", cuarto: "USA" },
+            { codigo: "C-104", primer: "ESP", segundo: "MAR", tercer: "FRA", cuarto: "ARG" },
+            { codigo: "C-105", primer: "MAR", segundo: "ESP", tercer: "ENG", cuarto: "BRA" },
+            { codigo: "C-106", primer: "POR", segundo: "ARG", tercer: "GER", cuarto: "FRA" },
+            { codigo: "C-107", primer: "GER", segundo: "USA", tercer: "MAR", cuarto: "ESP" },
+            { codigo: "C-108", primer: "USA", segundo: "ENG", tercer: "ARG", cuarto: "POR" },
+            { codigo: "C-109", primer: "ENG", segundo: "BRA", tercer: "FRA", cuarto: "GER" },
+            { codigo: "C-110", primer: "FRA", segundo: "ESP", tercer: "BRA", cuarto: "MAR" },
+
+            // 10 de Mendez (10-19)
+            { codigo: "C-111", primer: "ARG", segundo: "BRA", tercer: "ESP", cuarto: "FRA" },
+            { codigo: "C-112", primer: "BRA", segundo: "POR", tercer: "MAR", cuarto: "GER" },
+            { codigo: "C-113", primer: "ESP", segundo: "ARG", tercer: "ENG", cuarto: "USA" },
+            { codigo: "C-114", primer: "MAR", segundo: "FRA", tercer: "GER", cuarto: "POR" },
+            { codigo: "C-115", primer: "POR", segundo: "ENG", tercer: "FRA", cuarto: "ARG" },
+            { codigo: "C-116", primer: "GER", segundo: "MAR", tercer: "USA", cuarto: "BRA" },
+            { codigo: "C-117", primer: "USA", segundo: "ESP", tercer: "ARG", cuarto: "MAR" },
+            { codigo: "C-118", primer: "ENG", segundo: "GER", tercer: "BRA", cuarto: "ESP" },
+            { codigo: "C-119", primer: "FRA", segundo: "ARG", tercer: "POR", cuarto: "USA" },
+            { codigo: "C-120", primer: "BRA", segundo: "FRA", tercer: "ESP", cuarto: "ENG" },
+
+            // 10 de Yusneidy (20-29)
+            { codigo: "C-121", primer: "ESP", segundo: "BRA", tercer: "ARG", cuarto: "POR" },
+            { codigo: "C-122", primer: "MAR", segundo: "GER", tercer: "FRA", cuarto: "USA" },
+            { codigo: "C-123", primer: "POR", segundo: "ESP", tercer: "MAR", cuarto: "ENG" },
+            { codigo: "C-124", primer: "GER", segundo: "ARG", tercer: "BRA", cuarto: "FRA" },
+            { codigo: "C-125", primer: "USA", segundo: "FRA", tercer: "GER", cuarto: "ESP" },
+            { codigo: "C-126", primer: "ENG", segundo: "MAR", tercer: "POR", cuarto: "ARG" },
+            { codigo: "C-127", primer: "FRA", segundo: "USA", tercer: "ESP", cuarto: "BRA" },
+            { codigo: "C-128", primer: "ARG", segundo: "ENG", tercer: "MAR", cuarto: "GER" },
+            { codigo: "C-129", primer: "BRA", segundo: "ESP", tercer: "FRA", cuarto: "POR" },
+            { codigo: "C-130", primer: "ESP", segundo: "GER", tercer: "USA", cuarto: "ARG" },
+
+            // 10 de Varon (30-39)
+            { codigo: "C-131", primer: "MAR", segundo: "ARG", tercer: "POR", cuarto: "FRA" },
+            { codigo: "C-132", primer: "POR", segundo: "BRA", tercer: "GER", cuarto: "ENG" },
+            { codigo: "C-133", primer: "GER", segundo: "FRA", tercer: "USA", cuarto: "ESP" },
+            { codigo: "C-134", primer: "USA", segundo: "ESP", tercer: "MAR", cuarto: "BRA" },
+            { codigo: "C-135", primer: "ENG", segundo: "POR", tercer: "ARG", cuarto: "GER" },
+            { codigo: "C-136", primer: "FRA", segundo: "MAR", tercer: "BRA", cuarto: "USA" },
+            { codigo: "C-137", primer: "ARG", segundo: "GER", tercer: "ESP", cuarto: "POR" },
+            { codigo: "C-138", primer: "BRA", segundo: "USA", tercer: "ENG", cuarto: "FRA" },
+            { codigo: "C-139", primer: "ESP", segundo: "ENG", tercer: "MAR", cuarto: "ARG" },
+            { codigo: "C-140", primer: "MAR", segundo: "BRA", tercer: "FRA", cuarto: "ESP" },
+
+            // 10 de Maria (40-49)
+            { codigo: "C-141", primer: "POR", segundo: "FRA", tercer: "ARG", cuarto: "GER" },
+            { codigo: "C-142", primer: "GER", segundo: "BRA", tercer: "ESP", cuarto: "USA" },
+            { codigo: "C-143", primer: "USA", segundo: "ARG", tercer: "MAR", cuarto: "ENG" },
+            { codigo: "C-144", primer: "ENG", segundo: "ESP", tercer: "POR", cuarto: "FRA" },
+            { codigo: "C-145", primer: "FRA", segundo: "GER", tercer: "BRA", cuarto: "MAR" },
+            { codigo: "C-146", primer: "ARG", segundo: "MAR", tercer: "USA", cuarto: "ESP" },
+            { codigo: "C-147", primer: "BRA", segundo: "ENG", tercer: "FRA", cuarto: "POR" },
+            { codigo: "C-148", primer: "ESP", segundo: "POR", tercer: "GER", cuarto: "ARG" },
+            { codigo: "C-149", primer: "MAR", segundo: "USA", tercer: "ENG", cuarto: "BRA" },
+            { codigo: "C-150", primer: "POR", segundo: "GER", tercer: "FRA", cuarto: "USA" },
+
+            // 10 de Papa (50-59)
+            { codigo: "C-151", primer: "GER", segundo: "FRA", tercer: "ARG", cuarto: "ESP" },
+            { codigo: "C-152", primer: "USA", segundo: "BRA", tercer: "POR", cuarto: "MAR" },
+            { codigo: "C-153", primer: "ENG", segundo: "ESP", tercer: "GER", cuarto: "USA" },
+            { codigo: "C-154", primer: "FRA", segundo: "MAR", tercer: "ENG", cuarto: "ARG" },
+            { codigo: "C-155", primer: "ARG", segundo: "POR", tercer: "BRA", cuarto: "GER" },
+            { codigo: "C-156", primer: "BRA", segundo: "GER", tercer: "ESP", cuarto: "FRA" },
+            { codigo: "C-157", primer: "ESP", segundo: "USA", tercer: "MAR", cuarto: "POR" },
+            { codigo: "C-158", primer: "MAR", segundo: "ENG", tercer: "FRA", cuarto: "GER" },
+            { codigo: "C-159", primer: "POR", segundo: "ARG", tercer: "USA", cuarto: "BRA" },
+            { codigo: "C-160", primer: "GER", segundo: "ESP", tercer: "POR", cuarto: "ENG" }
+        ];
+
+        // Estado en memoria de cada tarjeta (60 elementos: 'neutro', 'ganador' o 'perdedor')
+        let estadosTarjetas = Array(60).fill('neutro');
+
+        // Renderizar la interfaz agrupada por personas con diseño unificado y condicional de estado
+        function renderizarInterfaz(filtroPersona = "TODOS") {
+            const contenedor = document.getElementById("contenedor-principal");
+            contenedor.innerHTML = "";
+
+            personas.forEach((persona, indexPersona) => {
+                // Si el filtro está activado para una persona específica, omitir las demás
+                if (filtroPersona !== "TODOS" && filtroPersona !== persona) {
+                    return;
+                }
+
+                // Obtener las 10 combinaciones asignadas a la persona
+                const inicioIndex = indexPersona * 10;
+                const finIndex = inicioIndex + 10;
+                const jugadasPersona = todasLasQuinielas.slice(inicioIndex, finIndex);
+
+                // Crear sección de la persona
+                const seccion = document.createElement("div");
+                seccion.className = "bg-emerald-950/20 p-6 rounded-3xl border border-emerald-900/30 shadow-sm";
+                
+                // Cabecera de la sección
+                seccion.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-emerald-900/60 pb-3 mb-6">
+                        <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+                            <i class="fas fa-user text-emerald-400"></i> Quinielas de ${persona} 
+                            <span class="text-xs font-normal text-emerald-500 bg-emerald-950 px-2 py-0.5 rounded-full">
+                                10 Posibilidades
+                            </span>
+                        </h2>
+                        <span class="text-[10px] text-emerald-600 font-mono">Jugadas #${inicioIndex + 1} a #${finIndex}</span>
+                    </div>
+                `;
+
+                // Grid de tarjetas de esta persona (responsivo)
+                const grid = document.createElement("div");
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4";
+
+                jugadasPersona.forEach((quiniela, idxInterno) => {
+                    const numeroJugadaAbsoluto = inicioIndex + idxInterno;
+                    const numeroJugadaInterno = idxInterno + 1;
+                    const estadoActual = estadosTarjetas[numeroJugadaAbsoluto];
+
+                    const p1 = banderasEquipos[quiniela.primer];
+                    const p2 = banderasEquipos[quiniela.segundo];
+                    const p3 = banderasEquipos[quiniela.tercer];
+                    const p4 = banderasEquipos[quiniela.cuarto];
+                    const codigoUnico = quiniela.codigo;
+
+                    // Clases dinámicas basadas en el estado de cada tarjeta
+                    let cardClasses = "";
+                    let tableHeaderBg = "";
+                    let firstPlaceBadge = "";
+                    let thirdPlaceBorder = "";
+                    let textLightClass = "";
+                    let textDarkClass = "";
+                    let codeBadgeClasses = "";
+
+                    if (estadoActual === 'ganador') {
+                        // DISEÑO PARA GANADOR: Alegre, claro, llamativo
+                        cardClasses = "bg-gradient-to-br from-emerald-400 via-teal-100 to-green-300 text-slate-900 border-emerald-300 shadow-[0_10px_25px_-5px_rgba(16,185,129,0.5)] scale-[1.02] border-2";
+                        tableHeaderBg = "bg-gradient-to-r from-emerald-600 to-teal-600 text-white";
+                        firstPlaceBadge = "bg-emerald-600 text-white font-extrabold px-1.5 py-0.5 rounded border border-emerald-700";
+                        thirdPlaceBorder = "border-emerald-600 bg-emerald-500/20 relative";
+                        textLightClass = "text-slate-800";
+                        textDarkClass = "text-slate-950";
+                        codeBadgeClasses = "bg-emerald-700 text-white font-extrabold";
+                    } else if (estadoActual === 'perdedor') {
+                        // DISEÑO PARA PERDEDOR: Descartado, gris, lavado/opaco
+                        cardClasses = "bg-[#0c1410] border-zinc-800 opacity-30 pointer-events-auto filter grayscale contrast-75";
+                        tableHeaderBg = "bg-zinc-800 text-zinc-400";
+                        firstPlaceBadge = "bg-zinc-700/50 text-zinc-400 font-bold px-1.5 py-0.5 rounded";
+                        thirdPlaceBorder = "border-zinc-800 bg-zinc-900/10";
+                        textLightClass = "text-zinc-500";
+                        textDarkClass = "text-zinc-400";
+                        codeBadgeClasses = "bg-zinc-800 text-zinc-500 border border-zinc-700";
+                    } else {
+                        // DISEÑO NEUTRO (Por defecto, fiel a tu imagen original)
+                        cardClasses = "bg-gradient-to-b from-[#02241b] to-[#011a13] text-white border-emerald-800/60 shadow-lg hover:border-emerald-500/40";
+                        tableHeaderBg = "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-400/80";
+                        firstPlaceBadge = "bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.5 rounded border border-amber-500/30";
+                        thirdPlaceBorder = "border-emerald-500/40 bg-emerald-900/10 relative";
+                        textLightClass = "text-emerald-400";
+                        textDarkClass = "text-white";
+                        codeBadgeClasses = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                    }
+
+                    const tarjetaHtml = `
+                        <div class="card-transition rounded-2xl p-3 border ${cardClasses}">
+                            
+                            <!-- Header de la Tarjeta: Nombre de la persona, Código Único y número de jugada -->
+                            <div class="flex justify-between items-center mb-2.5 pb-1 border-b ${estadoActual === 'ganador' ? 'border-emerald-400/30' : 'border-emerald-900/50'}">
+                                <span class="text-xs font-black tracking-wide uppercase ${estadoActual === 'ganador' ? 'text-emerald-950' : 'text-amber-400'}">
+                                    ${persona}
+                                </span>
+                                <div class="flex gap-1.5 items-center">
+                                    <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${codeBadgeClasses}">
+                                        ${codigoUnico}
+                                    </span>
+                                    <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md ${estadoActual === 'ganador' ? 'bg-emerald-600 text-white' : 'bg-emerald-900/60 text-emerald-400 border border-emerald-800'}">
+                                        #${String(numeroJugadaInterno).padStart(2, '0')}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Tabla Única / Unificada de las 4 posiciones -->
+                            <div class="rounded-xl overflow-hidden border ${estadoActual === 'ganador' ? 'border-emerald-400/40' : 'border-emerald-950'} ${estadoActual === 'ganador' ? 'bg-white/70' : 'bg-[#01140e]'}">
+                                
+                                <!-- Encabezado de la Tabla -->
+                                <div class="py-1 px-3 border-b ${estadoActual === 'ganador' ? 'border-emerald-400/30' : 'border-emerald-950'} flex items-center justify-between text-[10px] font-bold tracking-wider uppercase ${tableHeaderBg}">
+                                    <span>POSICIONES</span>
+                                    <i class="fas fa-list-ol"></i>
+                                </div>
+
+                                <!-- 1º Puesto -->
+                                <div class="team-row-unified p-2.5 flex items-center justify-between border-b ${estadoActual === 'ganador' ? 'border-emerald-400/20' : 'border-emerald-950'}">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <img src="${p1.bandera}" alt="${p1.nombre}" class="w-5 h-3.5 object-cover rounded-sm shadow border border-black/10">
+                                        <span class="font-extrabold text-xs ${textDarkClass}">${quiniela.primer}</span>
+                                        <span class="text-[10px] ${textLightClass} truncate max-w-[70px]">${p1.nombre}</span>
+                                    </div>
+                                    <span class="text-[9px] ${firstPlaceBadge}">1º</span>
+                                </div>
+
+                                <!-- 2º Puesto -->
+                                <div class="team-row-unified p-2.5 flex items-center justify-between border-b ${estadoActual === 'ganador' ? 'border-emerald-400/20' : 'border-emerald-950'}">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <img src="${p2.bandera}" alt="${p2.nombre}" class="w-5 h-3.5 object-cover rounded-sm shadow border border-black/10">
+                                        <span class="font-extrabold text-xs ${textDarkClass}">${quiniela.segundo}</span>
+                                        <span class="text-[10px] ${textLightClass} truncate max-w-[70px]">${p2.nombre}</span>
+                                    </div>
+                                    <span class="text-[9px] font-bold px-1 py-0.5 rounded ${estadoActual === 'ganador' ? 'bg-teal-600/20 text-teal-900' : 'bg-slate-500/20 text-slate-300'}">2º</span>
+                                </div>
+
+                                <!-- 3º Puesto (Destacado con borde e ícono check verde según la imagen) -->
+                                <div class="team-row-unified p-2.5 flex items-center justify-between border-b ${estadoActual === 'ganador' ? 'border-emerald-400/20' : 'border-emerald-950'} ${thirdPlaceBorder}">
+                                    <div class="absolute inset-0 border rounded-sm pointer-events-none ${estadoActual === 'ganador' ? 'border-emerald-500' : 'border-emerald-500/40'}"></div>
+                                    <div class="flex items-center gap-2.5 min-w-0 z-10">
+                                        <img src="${p3.bandera}" alt="${p3.nombre}" class="w-5 h-3.5 object-cover rounded-sm shadow border border-black/10">
+                                        <span class="font-extrabold text-xs ${textDarkClass}">${quiniela.tercer}</span>
+                                        <span class="text-[10px] ${textLightClass} truncate max-w-[70px]">${p3.nombre}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 z-10">
+                                        <span class="text-[9px] font-bold ${estadoActual === 'ganador' ? 'text-emerald-900' : 'text-emerald-300'}">3º</span>
+                                        <i class="fas fa-check text-emerald-500 text-xs"></i>
+                                    </div>
+                                </div>
+
+                                <!-- 4º Puesto -->
+                                <div class="team-row-unified p-2.5 flex items-center justify-between">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <img src="${p4.bandera}" alt="${p4.nombre}" class="w-5 h-3.5 object-cover rounded-sm shadow border border-black/10">
+                                        <span class="font-extrabold text-xs ${textDarkClass}">${quiniela.cuarto}</span>
+                                        <span class="text-[10px] ${textLightClass} truncate max-w-[70px]">${p4.nombre}</span>
+                                    </div>
+                                    <span class="text-[9px] font-medium px-1 py-0.5 ${estadoActual === 'ganador' ? 'text-slate-600' : 'text-slate-500'}">4º</span>
+                                </div>
+
+                            </div>
+
+                            <!-- Botones de Acción (Ganador / Perdedor) -->
+                            <div class="flex gap-1.5 mt-3 pt-2.5 border-t ${estadoActual === 'ganador' ? 'border-emerald-500/20' : 'border-emerald-900/30'}">
+                                <button onclick="cambiarEstadoTarjeta(${numeroJugadaAbsoluto}, 'ganador')" 
+                                        class="flex-1 text-[10px] font-bold py-1 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${estadoActual === 'ganador' ? 'bg-emerald-700 text-white shadow-sm' : 'bg-emerald-950/80 text-emerald-400 hover:bg-emerald-900 border border-emerald-900/60'}">
+                                    <i class="fas fa-trophy"></i> Ganador
+                                </button>
+                                <button onclick="cambiarEstadoTarjeta(${numeroJugadaAbsoluto}, 'perdedor')" 
+                                        class="flex-1 text-[10px] font-bold py-1 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${estadoActual === 'perdedor' ? 'bg-zinc-700 text-white shadow-sm' : 'bg-red-950/20 text-red-400 hover:bg-red-950/50 border border-red-950/60'}">
+                                    <i class="fas fa-times-circle"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    grid.innerHTML += tarjetaHtml;
+                });
+
+                seccion.appendChild(grid);
+                contenedor.appendChild(seccion);
+            });
+        }
+
+        // Alternar el estado de una tarjeta en base a su ID único absoluto (0-59)
+        function cambiarEstadoTarjeta(id, nuevoEstado) {
+            // Si hace clic en el que ya estaba activo, se restaura a 'neutro'
+            if (estadosTarjetas[id] === nuevoEstado) {
+                estadosTarjetas[id] = 'neutro';
+            } else {
+                estadosTarjetas[id] = nuevoEstado;
+            }
+            
+            // Re-renderiza para aplicar las nuevas clases dinámicas de Tailwind
+            const botonActivo = document.querySelector(".tab-btn.bg-amber-500");
+            const filtroActual = botonActivo ? botonActivo.id.replace("btn-", "") : "TODOS";
+            renderizarInterfaz(filtroActual);
+        }
+
+        // Cambiar pestañas activas para filtrar por participante
+        function filtrarPersona(nombrePersona) {
+            // Quitar clase activa a todos los botones
+            document.querySelectorAll(".tab-btn").forEach(btn => {
+                btn.className = "tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all text-emerald-300 hover:bg-emerald-900/40";
+            });
+
+            // Añadir clase activa al botón seleccionado
+            const btnActivo = document.getElementById(`btn-${nombrePersona}`);
+            if (btnActivo) {
+                btnActivo.className = "tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-amber-500 text-slate-950";
+            }
+
+            renderizarInterfaz(nombrePersona);
+        }
+
+        // Exportar a un cuadro de diálogo con texto plano incluyendo estados
+        function exportarQuinielas() {
+            const modal = document.getElementById("modal-exportar");
+            const textarea = document.getElementById("texto-exportado");
+            
+            let texto = "========================================================\n";
+            texto += "        REPARTO DE QUINIELAS MUNDIALISTAS (60 JUGADAS)\n";
+            texto += "========================================================\n\n";
+            
+            personas.forEach((persona, indexPersona) => {
+                const inicioIndex = indexPersona * 10;
+                const finIndex = inicioIndex + 10;
+                const jugadas = todasLasQuinielas.slice(inicioIndex, finIndex);
+
+                texto += `PARTICIPANTE: ${persona.toUpperCase()} (Jugadas #${inicioIndex + 1} a #${finIndex})\n`;
+                texto += `--------------------------------------------------------\n`;
+                
+                jugadas.forEach((q, idxInterno) => {
+                    const absolutoIdx = inicioIndex + idxInterno;
+                    const estado = estadosTarjetas[absolutoIdx];
+                    let marcaEstado = "[ NEUTRO ] ";
+                    if (estado === 'ganador') marcaEstado = "[🏆 GANADOR] ";
+                    if (estado === 'perdedor') marcaEstado = "[✖ ELIMINADO]";
+
+                    texto += `  Jugada #${idxInterno + 1} (Código: ${q.codigo}): ${marcaEstado} [1º] ${q.primer} | [2º] ${q.segundo} | [3º] ${q.tercer} (✅) | [4º] ${q.cuarto}\n`;
+                });
+                texto += `========================================================\n\n`;
+            });
+
+            textarea.value = texto;
+            modal.classList.remove("hidden");
+        }
+
+        function cerrarModal() {
+            document.getElementById("modal-exportar").classList.add("hidden");
+        }
+
+        function copiarAlPortapapeles() {
+            const textarea = document.getElementById("texto-exportado");
+            textarea.select();
+            document.execCommand('copy');
+            alert("¡Copiado al portapapeles con éxito!");
+        }
+
+        // Carga inicial al cargar el DOM
+        window.onload = function() {
+            renderizarInterfaz();
+        }
+    </script>
+</body>
+</html>
