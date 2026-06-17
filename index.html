@@ -40,10 +40,10 @@
                     Mundial 2026
                 </span>
                 <h1 class="text-2xl md:text-3xl font-black mt-1 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-emerald-400">
-                    QUINIELAS ASIGNADAS
+                    QUINIELAS GANADORAS
                 </h1>
                 <p class="text-emerald-400 text-xs mt-0.5">
-                    Filtra y descarta las combinaciones perdedoras en tiempo real. Cada combinación cuenta con su código único.
+                    Filtra las combinaciones de cada usuaria.
                 </p>
             </div>
             
@@ -98,13 +98,16 @@
                 <button onclick="cerrarModal()" class="text-emerald-400 hover:text-white"><i class="fas fa-times"></i></button>
             </div>
             <textarea id="texto-exportado" readonly class="w-full h-80 bg-emerald-900/40 border border-emerald-800 rounded-xl p-4 font-mono text-xs text-emerald-200 focus:outline-none mb-4"></textarea>
-            <div class="flex justify-end gap-3">
-                <button onclick="copiarAlPortapapeles()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-2">
-                    <i class="fas fa-copy"></i> Copiar
-                </button>
-                <button onclick="cerrarModal()" class="bg-emerald-800 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-xs">
-                    Cerrar
-                </button>
+            <div class="flex justify-between items-center">
+                <span id="export-status" class="text-xs text-emerald-400 font-medium"></span>
+                <div class="flex gap-3">
+                    <button onclick="copiarAlPortapapeles()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-2">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                    <button onclick="cerrarModal()" class="bg-emerald-800 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-xs">
+                        Cerrar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -132,83 +135,80 @@
         };
 
         // ARRAY DE OBJETOS ESTÁTICO DE 60 QUINIELAS DIRECTAS (No aleatorio)
-        // Se agregó un campo "codigo" único para identificar individualmente cada combinación
+        // Se ha mapeado el campo "estado" directamente en los objetos, todos inicializados en "neutro".
         const todasLasQuinielas = [
             // 10 de Anibal (0-9)
-            { codigo: "C-101", primer: "FRA", segundo: "BRA", tercer: "MAR", cuarto: "ARG" },
-            { codigo: "C-102", primer: "ARG", segundo: "FRA", tercer: "ESP", cuarto: "ENG" },
-            { codigo: "C-103", primer: "BRA", segundo: "GER", tercer: "POR", cuarto: "USA" },
-            { codigo: "C-104", primer: "ESP", segundo: "MAR", tercer: "FRA", cuarto: "ARG" },
-            { codigo: "C-105", primer: "MAR", segundo: "ESP", tercer: "ENG", cuarto: "BRA" },
-            { codigo: "C-106", primer: "POR", segundo: "ARG", tercer: "GER", cuarto: "FRA" },
-            { codigo: "C-107", primer: "GER", segundo: "USA", tercer: "MAR", cuarto: "ESP" },
-            { codigo: "C-108", primer: "USA", segundo: "ENG", tercer: "ARG", cuarto: "POR" },
-            { codigo: "C-109", primer: "ENG", segundo: "BRA", tercer: "FRA", cuarto: "GER" },
-            { codigo: "C-110", primer: "FRA", segundo: "ESP", tercer: "BRA", cuarto: "MAR" },
+            { codigo: "C-101", primer: "FRA", segundo: "BRA", tercer: "MAR", cuarto: "ARG", estado: "neutro" },
+            { codigo: "C-102", primer: "ARG", segundo: "FRA", tercer: "ESP", cuarto: "ENG", estado: "neutro" },
+            { codigo: "C-103", primer: "BRA", segundo: "GER", tercer: "POR", cuarto: "USA", estado: "neutro" },
+            { codigo: "C-104", primer: "ESP", segundo: "MAR", tercer: "FRA", cuarto: "ARG", estado: "neutro" },
+            { codigo: "C-105", primer: "MAR", segundo: "ESP", tercer: "ENG", cuarto: "BRA", estado: "neutro" },
+            { codigo: "C-106", primer: "POR", segundo: "ARG", tercer: "GER", cuarto: "FRA", estado: "neutro" },
+            { codigo: "C-107", primer: "GER", segundo: "USA", tercer: "MAR", cuarto: "ESP", estado: "neutro" },
+            { codigo: "C-108", primer: "USA", segundo: "ENG", tercer: "ARG", cuarto: "POR", estado: "neutro" },
+            { codigo: "C-109", primer: "ENG", segundo: "BRA", tercer: "FRA", cuarto: "GER", estado: "neutro" },
+            { codigo: "C-110", primer: "FRA", segundo: "ESP", tercer: "BRA", cuarto: "MAR", estado: "neutro" },
 
             // 10 de Mendez (10-19)
-            { codigo: "C-111", primer: "ARG", segundo: "BRA", tercer: "ESP", cuarto: "FRA" },
-            { codigo: "C-112", primer: "BRA", segundo: "POR", tercer: "MAR", cuarto: "GER" },
-            { codigo: "C-113", primer: "ESP", segundo: "ARG", tercer: "ENG", cuarto: "USA" },
-            { codigo: "C-114", primer: "MAR", segundo: "FRA", tercer: "GER", cuarto: "POR" },
-            { codigo: "C-115", primer: "POR", segundo: "ENG", tercer: "FRA", cuarto: "ARG" },
-            { codigo: "C-116", primer: "GER", segundo: "MAR", tercer: "USA", cuarto: "BRA" },
-            { codigo: "C-117", primer: "USA", segundo: "ESP", tercer: "ARG", cuarto: "MAR" },
-            { codigo: "C-118", primer: "ENG", segundo: "GER", tercer: "BRA", cuarto: "ESP" },
-            { codigo: "C-119", primer: "FRA", segundo: "ARG", tercer: "POR", cuarto: "USA" },
-            { codigo: "C-120", primer: "BRA", segundo: "FRA", tercer: "ESP", cuarto: "ENG" },
+            { codigo: "C-111", primer: "ARG", segundo: "BRA", tercer: "ESP", cuarto: "FRA", estado: "neutro" },
+            { codigo: "C-112", primer: "BRA", segundo: "POR", tercer: "MAR", cuarto: "GER", estado: "neutro" },
+            { codigo: "C-113", primer: "ESP", segundo: "ARG", tercer: "ENG", cuarto: "USA", estado: "neutro" },
+            { codigo: "C-114", primer: "MAR", segundo: "FRA", tercer: "GER", cuarto: "POR", estado: "neutro" },
+            { codigo: "C-115", primer: "POR", segundo: "ENG", tercer: "FRA", cuarto: "ARG", estado: "neutro" },
+            { codigo: "C-116", primer: "GER", segundo: "MAR", tercer: "USA", cuarto: "BRA", estado: "neutro" },
+            { codigo: "C-117", primer: "USA", segundo: "ESP", tercer: "ARG", cuarto: "MAR", estado: "neutro" },
+            { codigo: "C-118", primer: "ENG", segundo: "GER", tercer: "BRA", cuarto: "ESP", estado: "neutro" },
+            { codigo: "C-119", primer: "FRA", segundo: "ARG", tercer: "POR", cuarto: "USA", estado: "neutro" },
+            { codigo: "C-120", primer: "BRA", segundo: "FRA", tercer: "ESP", cuarto: "ENG", estado: "neutro" },
 
             // 10 de Yusneidy (20-29)
-            { codigo: "C-121", primer: "ESP", segundo: "BRA", tercer: "ARG", cuarto: "POR" },
-            { codigo: "C-122", primer: "MAR", segundo: "GER", tercer: "FRA", cuarto: "USA" },
-            { codigo: "C-123", primer: "POR", segundo: "ESP", tercer: "MAR", cuarto: "ENG" },
-            { codigo: "C-124", primer: "GER", segundo: "ARG", tercer: "BRA", cuarto: "FRA" },
-            { codigo: "C-125", primer: "USA", segundo: "FRA", tercer: "GER", cuarto: "ESP" },
-            { codigo: "C-126", primer: "ENG", segundo: "MAR", tercer: "POR", cuarto: "ARG" },
-            { codigo: "C-127", primer: "FRA", segundo: "USA", tercer: "ESP", cuarto: "BRA" },
-            { codigo: "C-128", primer: "ARG", segundo: "ENG", tercer: "MAR", cuarto: "GER" },
-            { codigo: "C-129", primer: "BRA", segundo: "ESP", tercer: "FRA", cuarto: "POR" },
-            { codigo: "C-130", primer: "ESP", segundo: "GER", tercer: "USA", cuarto: "ARG" },
+            { codigo: "C-121", primer: "ESP", segundo: "BRA", tercer: "ARG", cuarto: "POR", estado: "neutro" },
+            { codigo: "C-122", primer: "MAR", segundo: "GER", tercer: "FRA", cuarto: "USA", estado: "neutro" },
+            { codigo: "C-123", primer: "POR", segundo: "ESP", tercer: "MAR", cuarto: "ENG", estado: "neutro" },
+            { codigo: "C-124", primer: "GER", segundo: "ARG", tercer: "BRA", cuarto: "FRA", estado: "neutro" },
+            { codigo: "C-125", primer: "USA", segundo: "FRA", tercer: "GER", cuarto: "ESP", estado: "neutro" },
+            { codigo: "C-126", primer: "ENG", segundo: "MAR", tercer: "POR", cuarto: "ARG", estado: "neutro" },
+            { codigo: "C-127", primer: "FRA", segundo: "USA", tercer: "ESP", cuarto: "BRA", estado: "neutro" },
+            { codigo: "C-128", primer: "ARG", segundo: "ENG", tercer: "MAR", cuarto: "GER", estado: "neutro" },
+            { codigo: "C-129", primer: "BRA", segundo: "ESP", tercer: "FRA", cuarto: "POR", estado: "neutro" },
+            { codigo: "C-130", primer: "ESP", segundo: "GER", tercer: "USA", cuarto: "ARG", estado: "neutro" },
 
             // 10 de Varon (30-39)
-            { codigo: "C-131", primer: "MAR", segundo: "ARG", tercer: "POR", cuarto: "FRA" },
-            { codigo: "C-132", primer: "POR", segundo: "BRA", tercer: "GER", cuarto: "ENG" },
-            { codigo: "C-133", primer: "GER", segundo: "FRA", tercer: "USA", cuarto: "ESP" },
-            { codigo: "C-134", primer: "USA", segundo: "ESP", tercer: "MAR", cuarto: "BRA" },
-            { codigo: "C-135", primer: "ENG", segundo: "POR", tercer: "ARG", cuarto: "GER" },
-            { codigo: "C-136", primer: "FRA", segundo: "MAR", tercer: "BRA", cuarto: "USA" },
-            { codigo: "C-137", primer: "ARG", segundo: "GER", tercer: "ESP", cuarto: "POR" },
-            { codigo: "C-138", primer: "BRA", segundo: "USA", tercer: "ENG", cuarto: "FRA" },
-            { codigo: "C-139", primer: "ESP", segundo: "ENG", tercer: "MAR", cuarto: "ARG" },
-            { codigo: "C-140", primer: "MAR", segundo: "BRA", tercer: "FRA", cuarto: "ESP" },
+            { codigo: "C-131", primer: "MAR", segundo: "ARG", tercer: "POR", cuarto: "FRA", estado: "neutro" },
+            { codigo: "C-132", primer: "POR", segundo: "BRA", tercer: "GER", cuarto: "ENG", estado: "neutro" },
+            { codigo: "C-133", primer: "GER", segundo: "FRA", tercer: "USA", cuarto: "ESP", estado: "neutro" },
+            { codigo: "C-134", primer: "USA", segundo: "ESP", tercer: "MAR", cuarto: "BRA", estado: "neutro" },
+            { codigo: "C-135", primer: "ENG", segundo: "POR", tercer: "ARG", cuarto: "GER", estado: "neutro" },
+            { codigo: "C-136", primer: "FRA", segundo: "MAR", tercer: "BRA", cuarto: "USA", estado: "neutro" },
+            { codigo: "C-137", primer: "ARG", segundo: "GER", tercer: "ESP", cuarto: "POR", estado: "neutro" },
+            { codigo: "C-138", primer: "BRA", segundo: "USA", tercer: "ENG", cuarto: "FRA", estado: "neutro" },
+            { codigo: "C-139", primer: "ESP", segundo: "ENG", tercer: "MAR", cuarto: "ARG", estado: "neutro" },
+            { codigo: "C-140", primer: "MAR", segundo: "BRA", tercer: "FRA", cuarto: "ESP", estado: "neutro" },
 
             // 10 de Maria (40-49)
-            { codigo: "C-141", primer: "POR", segundo: "FRA", tercer: "ARG", cuarto: "GER" },
-            { codigo: "C-142", primer: "GER", segundo: "BRA", tercer: "ESP", cuarto: "USA" },
-            { codigo: "C-143", primer: "USA", segundo: "ARG", tercer: "MAR", cuarto: "ENG" },
-            { codigo: "C-144", primer: "ENG", segundo: "ESP", tercer: "POR", cuarto: "FRA" },
-            { codigo: "C-145", primer: "FRA", segundo: "GER", tercer: "BRA", cuarto: "MAR" },
-            { codigo: "C-146", primer: "ARG", segundo: "MAR", tercer: "USA", cuarto: "ESP" },
-            { codigo: "C-147", primer: "BRA", segundo: "ENG", tercer: "FRA", cuarto: "POR" },
-            { codigo: "C-148", primer: "ESP", segundo: "POR", tercer: "GER", cuarto: "ARG" },
-            { codigo: "C-149", primer: "MAR", segundo: "USA", tercer: "ENG", cuarto: "BRA" },
-            { codigo: "C-150", primer: "POR", segundo: "GER", tercer: "FRA", cuarto: "USA" },
+            { codigo: "C-141", primer: "POR", segundo: "FRA", tercer: "ARG", cuarto: "GER", estado: "neutro" },
+            { codigo: "C-142", primer: "GER", segundo: "BRA", tercer: "ESP", cuarto: "USA", estado: "neutro" },
+            { codigo: "C-143", primer: "USA", segundo: "ARG", tercer: "MAR", cuarto: "ENG", estado: "neutro" },
+            { codigo: "C-144", primer: "ENG", segundo: "ESP", tercer: "POR", cuarto: "FRA", estado: "neutro" },
+            { codigo: "C-145", primer: "FRA", segundo: "GER", tercer: "BRA", cuarto: "MAR", estado: "neutro" },
+            { codigo: "C-146", primer: "ARG", segundo: "MAR", tercer: "USA", cuarto: "ESP", estado: "neutro" },
+            { codigo: "C-147", primer: "BRA", segundo: "ENG", tercer: "FRA", cuarto: "POR", estado: "neutro" },
+            { codigo: "C-148", primer: "ESP", segundo: "POR", tercer: "GER", cuarto: "ARG", estado: "neutro" },
+            { codigo: "C-149", primer: "MAR", segundo: "USA", text: "MAR", tercer: "ENG", cuarto: "BRA", estado: "neutro" },
+            { codigo: "C-150", primer: "POR", segundo: "GER", tercer: "FRA", cuarto: "USA", estado: "neutro" },
 
             // 10 de Papa (50-59)
-            { codigo: "C-151", primer: "GER", segundo: "FRA", tercer: "ARG", cuarto: "ESP" },
-            { codigo: "C-152", primer: "USA", segundo: "BRA", tercer: "POR", cuarto: "MAR" },
-            { codigo: "C-153", primer: "ENG", segundo: "ESP", tercer: "GER", cuarto: "USA" },
-            { codigo: "C-154", primer: "FRA", segundo: "MAR", tercer: "ENG", cuarto: "ARG" },
-            { codigo: "C-155", primer: "ARG", segundo: "POR", tercer: "BRA", cuarto: "GER" },
-            { codigo: "C-156", primer: "BRA", segundo: "GER", tercer: "ESP", cuarto: "FRA" },
-            { codigo: "C-157", primer: "ESP", segundo: "USA", tercer: "MAR", cuarto: "POR" },
-            { codigo: "C-158", primer: "MAR", segundo: "ENG", tercer: "FRA", cuarto: "GER" },
-            { codigo: "C-159", primer: "POR", segundo: "ARG", tercer: "USA", cuarto: "BRA" },
-            { codigo: "C-160", primer: "GER", segundo: "ESP", tercer: "POR", cuarto: "ENG" }
+            { codigo: "C-151", primer: "GER", segundo: "FRA", tercer: "ARG", cuarto: "ESP", estado: "neutro" },
+            { codigo: "C-152", primer: "USA", segundo: "BRA", tercer: "POR", cuarto: "MAR", estado: "neutro" },
+            { codigo: "C-153", primer: "ENG", segundo: "ESP", tercer: "GER", cuarto: "USA", estado: "neutro" },
+            { codigo: "C-154", primer: "FRA", segundo: "MAR", tercer: "ENG", cuarto: "ARG", estado: "neutro" },
+            { codigo: "C-155", primer: "ARG", segundo: "POR", tercer: "BRA", cuarto: "GER", estado: "neutro" },
+            { codigo: "C-156", primer: "BRA", segundo: "GER", tercer: "ESP", cuarto: "FRA", estado: "neutro" },
+            { codigo: "C-157", primer: "ESP", segundo: "USA", tercer: "MAR", cuarto: "POR", estado: "neutro" },
+            { codigo: "C-158", primer: "MAR", segundo: "ENG", tercer: "FRA", cuarto: "GER", estado: "neutro" },
+            { codigo: "C-159", primer: "POR", segundo: "ARG", tercer: "USA", cuarto: "BRA", estado: "neutro" },
+            { codigo: "C-160", primer: "GER", segundo: "ESP", tercer: "POR", cuarto: "ENG", estado: "neutro" }
         ];
-
-        // Estado en memoria de cada tarjeta (60 elementos: 'neutro', 'ganador' o 'perdedor')
-        let estadosTarjetas = Array(60).fill('neutro');
 
         // Renderizar la interfaz agrupada por personas con diseño unificado y condicional de estado
         function renderizarInterfaz(filtroPersona = "TODOS") {
@@ -250,7 +250,9 @@
                 jugadasPersona.forEach((quiniela, idxInterno) => {
                     const numeroJugadaAbsoluto = inicioIndex + idxInterno;
                     const numeroJugadaInterno = idxInterno + 1;
-                    const estadoActual = estadosTarjetas[numeroJugadaAbsoluto];
+                    
+                    // Se lee el estado de forma directa desde la propiedad 'estado' del objeto en el array
+                    const estadoActual = todasLasQuinielas[numeroJugadaAbsoluto].estado;
 
                     const p1 = banderasEquipos[quiniela.primer];
                     const p2 = banderasEquipos[quiniela.segundo];
@@ -343,7 +345,7 @@
                                     <span class="text-[9px] font-bold px-1 py-0.5 rounded ${estadoActual === 'ganador' ? 'bg-teal-600/20 text-teal-900' : 'bg-slate-500/20 text-slate-300'}">2º</span>
                                 </div>
 
-                                <!-- 3º Puesto (Destacado con borde e ícono check verde según la imagen) -->
+                                <!-- 3º Puesto (Se eliminó el ícono de check de la interfaz visual según lo solicitado) -->
                                 <div class="team-row-unified p-2.5 flex items-center justify-between border-b ${estadoActual === 'ganador' ? 'border-emerald-400/20' : 'border-emerald-950'} ${thirdPlaceBorder}">
                                     <div class="absolute inset-0 border rounded-sm pointer-events-none ${estadoActual === 'ganador' ? 'border-emerald-500' : 'border-emerald-500/40'}"></div>
                                     <div class="flex items-center gap-2.5 min-w-0 z-10">
@@ -353,7 +355,6 @@
                                     </div>
                                     <div class="flex items-center gap-1.5 z-10">
                                         <span class="text-[9px] font-bold ${estadoActual === 'ganador' ? 'text-emerald-900' : 'text-emerald-300'}">3º</span>
-                                        <i class="fas fa-check text-emerald-500 text-xs"></i>
                                     </div>
                                 </div>
 
@@ -390,13 +391,13 @@
             });
         }
 
-        // Alternar el estado de una tarjeta en base a su ID único absoluto (0-59)
+        // Alternar el estado de una tarjeta directamente en el array 'todasLasQuinielas'
         function cambiarEstadoTarjeta(id, nuevoEstado) {
-            // Si hace clic en el que ya estaba activo, se restaura a 'neutro'
-            if (estadosTarjetas[id] === nuevoEstado) {
-                estadosTarjetas[id] = 'neutro';
+            // Se modifica la propiedad 'estado' directamente en el objeto del array
+            if (todasLasQuinielas[id].estado === nuevoEstado) {
+                todasLasQuinielas[id].estado = 'neutro';
             } else {
-                estadosTarjetas[id] = nuevoEstado;
+                todasLasQuinielas[id].estado = nuevoEstado;
             }
             
             // Re-renderiza para aplicar las nuevas clases dinámicas de Tailwind
@@ -421,10 +422,13 @@
             renderizarInterfaz(nombrePersona);
         }
 
-        // Exportar a un cuadro de diálogo con texto plano incluyendo estados
+        // Exportar a un cuadro de diálogo con texto plano incluyendo estados, sin iconos ✅
         function exportarQuinielas() {
             const modal = document.getElementById("modal-exportar");
             const textarea = document.getElementById("texto-exportado");
+            const statusLabel = document.getElementById("export-status");
+            
+            statusLabel.textContent = ""; // Reset del mensaje de copiado
             
             let texto = "========================================================\n";
             texto += "        REPARTO DE QUINIELAS MUNDIALISTAS (60 JUGADAS)\n";
@@ -440,12 +444,13 @@
                 
                 jugadas.forEach((q, idxInterno) => {
                     const absolutoIdx = inicioIndex + idxInterno;
-                    const estado = estadosTarjetas[absolutoIdx];
+                    const estado = todasLasQuinielas[absolutoIdx].estado;
                     let marcaEstado = "[ NEUTRO ] ";
                     if (estado === 'ganador') marcaEstado = "[🏆 GANADOR] ";
                     if (estado === 'perdedor') marcaEstado = "[✖ ELIMINADO]";
 
-                    texto += `  Jugada #${idxInterno + 1} (Código: ${q.codigo}): ${marcaEstado} [1º] ${q.primer} | [2º] ${q.segundo} | [3º] ${q.tercer} (✅) | [4º] ${q.cuarto}\n`;
+                    // Se eliminó el icono ✅ de la salida formateada
+                    texto += `  Jugada #${idxInterno + 1} (Código: ${q.codigo}): ${marcaEstado} [1º] ${q.primer} | [2º] ${q.segundo} | [3º] ${q.tercer} | [4º] ${q.cuarto}\n`;
                 });
                 texto += `========================================================\n\n`;
             });
@@ -460,9 +465,13 @@
 
         function copiarAlPortapapeles() {
             const textarea = document.getElementById("texto-exportado");
+            const statusLabel = document.getElementById("export-status");
             textarea.select();
             document.execCommand('copy');
-            alert("¡Copiado al portapapeles con éxito!");
+            statusLabel.textContent = "✓ ¡Copiado con éxito al portapapeles!";
+            setTimeout(() => {
+                statusLabel.textContent = "";
+            }, 3000);
         }
 
         // Carga inicial al cargar el DOM
